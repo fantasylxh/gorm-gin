@@ -6,18 +6,18 @@ import (
 )
 
 type ResponseData struct {
-	Status int
-	Meta   interface{}
-	Data   interface{}
+	Code   int
+	Msg    interface{}
+	Result interface{}
 }
 
-func RespondJSON(w *gin.Context, status int, payload interface{}) {
-	fmt.Println("status ", status)
+func RespondJSON(w *gin.Context, status int, payload interface{}, msg string) {
+	fmt.Println("code ", status)
 	var res ResponseData
 
-	res.Status = status
-	//res.Meta = utils.ResponseMessage(status)
-	res.Data = payload
+	res.Code = status
+	res.Msg = msg
+	res.Result = payload
 
 	w.JSON(200, res)
 }

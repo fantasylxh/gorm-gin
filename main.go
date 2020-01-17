@@ -19,7 +19,7 @@ func main() {
 	}
 	defer Config.DB.Close()
 	Config.DB.AutoMigrate(&Models.Book{})
-
+	Config.DB.LogMode(true)
 	r := Routers.SetupRouter()
 	// running
 	r.Run(":8082")
