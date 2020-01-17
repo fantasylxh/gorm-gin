@@ -1,3 +1,8 @@
 .idea
 .git
+<<<<<<< HEAD
 gin-bin.exe
+=======
+gin-bin.exe
+/*.exe
+>>>>>>> b9011c4f04cea88061361ff0a17d69a3c16690c3

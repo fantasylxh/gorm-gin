@@ -35,7 +35,6 @@ Config.DB, err = gorm.Open("mysql", "DBUSERNAME:DBPASSWORD@tcp(127.0.0.1:3306)/D
 |   └── Routers.go // Routers
 └── main.go
 ```
-
 ## API
 
 #### /book
