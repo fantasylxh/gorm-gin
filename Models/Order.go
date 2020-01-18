@@ -1,9 +1,9 @@
 package Models
 
 import (
-	"gorm-gin/Config"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"gorm-gin/Config"
 )
 
 func GetAllOrder(b *[]Order) (err error) {
@@ -27,9 +27,16 @@ func GetOneOrder(b *Order, id string) (err error) {
 	return nil
 }
 
+func GetOrderShip(b *[]ShipAction,id string) (err error) {
+	if err := Config.DB.Order("id desc").Where("order_id = ?", id).Find(b).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func PutOneOrder(b *Order, id string) (err error) {
 	fmt.Println(b)
-	Config.DB.Save(b)
+	Config.DB.Omit("order_sn").Save(b)
 	return nil
 }
 
