@@ -60,11 +60,11 @@ type Order struct {
 	Weight       string       `json:"weight" form:"weight" binding:"required"`
 	CategoryId   string       `json:"category_id" form:"category_id" binding:"required"`
 	PayTime      Time         `json:"pay_time"`
-	OrderType    string       `gorm:"default:'unknown'" "column:order_type"`
-	OrderStatus  int          `json:"order_status"`
-	OrderPrice   string       `gorm:"default:'0.00'" "column:order_price"`
-	PayStatus    int          `gorm:"default:'0'" column:"pay_status"`
-	ShipStatus   int          `gorm:"default:0" column:"ship_status"`
+	OrderCode    string       `json:"order_code" form:"order_code"`
+	OrderStatus  int          `json:"order_status" form:"order_status"`
+	OrderPrice   string       `json:"order_price"`
+	PayStatus    int          `json:"pay_status" form:"pay_status"`
+	ShipStatus   int          `json:"ship_status" form:"ship_status"`
 	PayQrcode    string       `json:"pay_qrcode" form:"pay_qrcode"`
 	Country      string       `json:"country" form:"country"`
 	Province     string       `json:"province" form:"province"`
@@ -92,6 +92,30 @@ type ShipAction struct {
 	OrderId    int    `json:"order_id"`
 }
 
+type Address struct {
+	ID          uint   `json:"address_id"`
+	Country     string `json:"country" form:"country" binding:"required"`
+	Province    string `json:"province" form:"province" binding:"required"`
+	City        string `json:"city" form:"city" binding:"required"`
+	Address     string `json:"address" form:"address" binding:"required"`
+	Mobile      string `json:"mobile" form:"mobile" binding:"required"`
+	AddressType int    `json:"address_type" form:"address_type"`
+	IsDefault   int    `json:"is_default" form:"is_default"`
+	CreatorId   int    `json:"creator_id"`
+	CreatedAt   Time   `json:"created_at"`
+	UpdatedAt   Time   `json:"-" "updated_at"`
+	DeletedAt   Time   `json:"-" "deleted_at"`
+}
+type PaymentCode struct {
+	ID        uint   `json:"id"`
+	Img       string `json:"img"`
+	Code      string `json:"code" form:"code" binding:"required"`
+	Status    string `json:"status" form:"status"`
+	CreatedAt Time   `json:"-" "created_at"`
+	UpdatedAt Time   `json:"-" "updated_at"`
+	DeletedAt Time   `json:"-" "deleted_at"`
+}
+
 func (b *Book) TableName() string {
 	return "book"
 }
@@ -113,4 +137,10 @@ func (b *Order) TableName() string {
 }
 func (b *ShipAction) TableName() string {
 	return "rms_ship_action"
+}
+func (b *Address) TableName() string {
+	return "rms_user_address"
+}
+func (b *PaymentCode) TableName() string {
+	return "rms_payment_code"
 }

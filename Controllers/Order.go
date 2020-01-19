@@ -65,27 +65,27 @@ func GetOrderShip(c *gin.Context) {
 	}
 }
 
-func OrderSign(c *gin.Context) {
-	var order Models.Order
-	id := strings.TrimSpace(c.PostForm("order_id"))
-	uid := strings.TrimSpace(c.PostForm("uid"))
-	err := Models.GetOneOrder(&order, id)
-	if err != nil {
-		ApiHelpers.RespondJSON(c, 0, "", err.Error())
-		return
-	}
-	if uid != order.CreatorId {
-		ApiHelpers.RespondJSON(c, 0, "", "订单不存在")
-		return
-	}
-	ApiHelpers.RespondJSON(c, 200, "", "success")
-}
-
 func OrderDo(c *gin.Context) {
+
 	var order Models.Order
 	id := strings.TrimSpace(c.PostForm("order_id"))
 	uid := strings.TrimSpace(c.PostForm("uid"))
+	order_method := strings.TrimSpace(c.PostForm("order_method"))
+	//value := strings.TrimSpace(c.PostForm("value"))
 	err := Models.GetOneOrder(&order, id)
+	var grade string = "B"
+	switch order_method {
+	case "order_pay_confirm": // 确认支付 更新付款时间
+		grade = "A"
+	case "order_cancel":// 取消订单
+		grade = "B"
+	case "order_sign":// 签收订单 记录物流
+		grade = "C"
+	default:
+		fmt.Printf("你的等级是 %s\n", grade );
+	}
+	// 记录order_action
+
 	if err != nil {
 		ApiHelpers.RespondJSON(c, 0, "", err.Error())
 		return
@@ -96,7 +96,6 @@ func OrderDo(c *gin.Context) {
 	}
 	ApiHelpers.RespondJSON(c, 200, "", "success")
 }
-
 
 func PutOneOrder(c *gin.Context) {
 	var order Models.Order
