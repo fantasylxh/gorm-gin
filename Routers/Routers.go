@@ -21,7 +21,7 @@ func SetupRouter() *gin.Engine {
 
 		v1.POST("user/login", Controllers.UserLogin)
 		v1.POST("user/modpwd", Controllers.UserChangePwd)
-		v1.POST("order/order_add", Controllers.AddNewOrder) //添加订单
+		v1.POST("order/add", Controllers.AddNewOrder) //添加订单
 		v1.POST("order/list", Controllers.ListOrder) // 订单列表
 		v1.POST("order/detail", Controllers.GetOneOrder) //获取订单详情
 		v1.POST("order/change", Controllers.PutOneOrder) //更新订单
