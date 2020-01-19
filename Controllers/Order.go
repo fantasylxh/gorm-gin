@@ -65,6 +65,39 @@ func GetOrderShip(c *gin.Context) {
 	}
 }
 
+func OrderSign(c *gin.Context) {
+	var order Models.Order
+	id := strings.TrimSpace(c.PostForm("order_id"))
+	uid := strings.TrimSpace(c.PostForm("uid"))
+	err := Models.GetOneOrder(&order, id)
+	if err != nil {
+		ApiHelpers.RespondJSON(c, 0, "", err.Error())
+		return
+	}
+	if uid != order.CreatorId {
+		ApiHelpers.RespondJSON(c, 0, "", "订单不存在")
+		return
+	}
+	ApiHelpers.RespondJSON(c, 200, "", "success")
+}
+
+func OrderDoPay(c *gin.Context) {
+	var order Models.Order
+	id := strings.TrimSpace(c.PostForm("order_id"))
+	uid := strings.TrimSpace(c.PostForm("uid"))
+	err := Models.GetOneOrder(&order, id)
+	if err != nil {
+		ApiHelpers.RespondJSON(c, 0, "", err.Error())
+		return
+	}
+	if uid != order.CreatorId {
+		ApiHelpers.RespondJSON(c, 0, "", "订单不存在")
+		return
+	}
+	ApiHelpers.RespondJSON(c, 200, "", "success")
+}
+
+
 func PutOneOrder(c *gin.Context) {
 	var order Models.Order
 	id := strings.TrimSpace(c.PostForm("order_id"))
