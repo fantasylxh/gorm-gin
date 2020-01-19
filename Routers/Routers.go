@@ -29,7 +29,7 @@ func SetupRouter() *gin.Engine {
 		v1.POST("order/upload", Controllers.Fileupload) // 上传文件
 		v1.POST("order/ship", Controllers.GetOrderShip) // 订单物流
 		v1.POST("order/sign", Controllers.OrderSign) // 订单签收
-		v1.POST("order/dopay", Controllers.OrderDoPay) // 订单签收
+		v1.POST("order/order_do", Controllers.OrderDo) // 订单支付 订单取消
 	}
 
 	return r

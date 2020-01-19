@@ -81,7 +81,7 @@ func OrderSign(c *gin.Context) {
 	ApiHelpers.RespondJSON(c, 200, "", "success")
 }
 
-func OrderDoPay(c *gin.Context) {
+func OrderDo(c *gin.Context) {
 	var order Models.Order
 	id := strings.TrimSpace(c.PostForm("order_id"))
 	uid := strings.TrimSpace(c.PostForm("uid"))
