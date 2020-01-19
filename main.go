@@ -12,7 +12,11 @@ var err error
 
 func main() {
 
+<<<<<<< HEAD
 	Config.DB, err = gorm.Open("mysql", "express:nkds3EZPtYzJP2mt@tcp(127.0.0.1:3306)/express?charset=utf8&parseTime=True&loc=Local")
+=======
+	Config.DB, err = gorm.Open("mysql", "express:nkds3EZPtYzJP2mt@tcp(127.0.0.1:3306)/sdrms?charset=utf8&parseTime=True&loc=Local")
+>>>>>>> 49d296468c8cd8762775ec66f78eb097466938f2
 
 	if err != nil {
 		fmt.Println("statuse: ", err)

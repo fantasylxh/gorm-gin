@@ -21,11 +21,16 @@ func SetupRouter() *gin.Engine {
 
 		v1.POST("user/login", Controllers.UserLogin)
 		v1.POST("user/modpwd", Controllers.UserChangePwd)
-		v1.POST("order/order_add", Controllers.AddNewOrder)
-		v1.POST("order/list", Controllers.ListOrder)
-		v1.POST("order/detail", Controllers.GetOneOrder)
+		v1.POST("order/order_add", Controllers.AddNewOrder) //添加订单
+		v1.POST("order/list", Controllers.ListOrder) // 订单列表
+		v1.POST("order/detail", Controllers.GetOneOrder) //获取订单详情
+		v1.POST("order/change", Controllers.PutOneOrder) //更新订单
+		v1.POST("order/delete", Controllers.DeleteOrder) // 删除订单
+		v1.POST("order/upload", Controllers.Fileupload) // 上传文件
+		v1.POST("order/ship", Controllers.GetOrderShip) // 订单物流
+		v1.POST("order/sign", Controllers.OrderSign) // 订单签收
+		v1.POST("order/order_do", Controllers.OrderDo) // 订单支付 订单取消
 	}
 
 	return r
 }
-

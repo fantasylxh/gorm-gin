@@ -5,4 +5,9 @@ gin-bin.exe
 =======
 gin-bin.exe
 /*.exe
+<<<<<<< HEAD
 >>>>>>> b9011c4f04cea88061361ff0a17d69a3c16690c3
+=======
+/main.go
+/static
+>>>>>>> 49d296468c8cd8762775ec66f78eb097466938f2
