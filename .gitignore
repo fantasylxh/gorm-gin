@@ -2,3 +2,5 @@
 .git
 gin-bin.exe
 /*.exe
+/main.go
+/static

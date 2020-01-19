@@ -5,6 +5,30 @@ import (
 	"time"
 )
 
+type Time time.Time
+
+const (
+	timeFormart = "2006-01-02 15:04:05"
+)
+
+func (t *Time) UnmarshalJSON(data []byte) (err error) {
+	now, err := time.ParseInLocation(`"`+timeFormart+`"`, string(data), time.Local)
+	*t = Time(now)
+	return
+}
+
+func (t Time) MarshalJSON() ([]byte, error) {
+	b := make([]byte, 0, len(timeFormart)+2)
+	b = append(b, '"')
+	b = time.Time(t).AppendFormat(b, timeFormart)
+	b = append(b, '"')
+	return b, nil
+}
+
+func (t Time) String() string {
+	return time.Time(t).Format(timeFormart)
+}
+
 type Book struct {
 	gorm.Model
 	Name     string `json:"name" form:"name"`
@@ -31,31 +55,41 @@ type BackendUser struct {
 }
 
 type Order struct {
-	Id           int       `json:"order_id"` // 自增
-	OrderSn      string    `json:"order_sn" form:"order_sn" binding:"required"`
-	Weight       string    `json:"weight" form:"weight" binding:"required"`
-	CategoryId   string    `json:"category_id" form:"category_id" binding:"required"`
-	PayTime      string    `json:"pay_time"`
-	OrderType    string    `json:"order_type" form:"order_type"`
-	OrderStatus  int       `json:"order_status"`
-	OrderPrice   string    `json:"order_price"`
-	PayStatus    string    `json:"pay_status"`
-	ShipStatus   string    `json:"ship_status"`
-	PayQrcode    string    `json:"pay_qrcode" form:"pay_qrcode"`
-	Country      string    `json:"country" form:"country"`
-	Province     string    `json:"province" form:"province"`
-	City         string    `json:"city" form:"city"`
-	Address      string    `json:"address" form:"address"`
-	Mobile       string    `json:"mobile" form:"mobile"`
-	AddressId    int       `json:"address_id" form:"address_id"`
-	RecAddressId int       `json:"rec_address_id" form:"rec_address_id"`
-	RecCountry   string    `json:"rec_country" form:"rec_country"`
-	RecProvince  string    `json:"rec_province" form:"rec_province"`
-	RecCity      string    `json:"rec_city" form:"rec_city"`
-	RecAddress   string    `json:"rec_address" form:"rec_address"`
-	RecMobile    string    `json:"rec_mobile" form:"rec_mobile"`
-	CreatedAt    time.Time `json:"created_at"`
-	CreatorId    int       `json:"creator_id"`
+	Id           int          `json:"order_id"` // 自增
+	OrderSn      string       `json:"order_sn" form:"order_sn" binding:"required"`
+	Weight       string       `json:"weight" form:"weight" binding:"required"`
+	CategoryId   string       `json:"category_id" form:"category_id" binding:"required"`
+	PayTime      Time         `json:"pay_time"`
+	OrderType    string       `gorm:"default:'unknown'" "column:order_type"`
+	OrderStatus  int          `json:"order_status"`
+	OrderPrice   string       `gorm:"default:'0.00'" "column:order_price"`
+	PayStatus    int          `gorm:"default:'0'" column:"pay_status"`
+	ShipStatus   int          `gorm:"default:0" column:"ship_status"`
+	PayQrcode    string       `json:"pay_qrcode" form:"pay_qrcode"`
+	Country      string       `json:"country" form:"country"`
+	Province     string       `json:"province" form:"province"`
+	City         string       `json:"city" form:"city"`
+	Address      string       `json:"address" form:"address"`
+	Mobile       string       `json:"mobile" form:"mobile"`
+	AddressId    int          `json:"address_id" form:"address_id"`
+	RecAddressId int          `json:"rec_address_id" form:"rec_address_id"`
+	RecCountry   string       `json:"rec_country" form:"rec_country"`
+	RecProvince  string       `json:"rec_province" form:"rec_province"`
+	RecCity      string       `json:"rec_city" form:"rec_city"`
+	RecAddress   string       `json:"rec_address" form:"rec_address"`
+	RecMobile    string       `json:"rec_mobile" form:"rec_mobile"`
+	CreatedAt    Time         `json:"created_at"`
+	UpdatedAt    time.Time    `json:"-" "updated_at"`
+	CreatorId    string       `json:"creator_id"`
+	ShipActions  []ShipAction `gorm:"FOREIGNKEY:OrderId;ASSOCIATION_FOREIGNKEY:Id"`
+}
+type ShipAction struct {
+	Id         int    `json:"id"` // 自增
+	ShipStatus int    `json:"ship_status"`
+	ActionNote string `json:"action_note"`
+	CreatedAt  Time   `json:"created_at"`
+	DeletedAt  Time   `json:"-" deleted_at"`
+	OrderId    int    `json:"order_id"`
 }
 
 func (b *Book) TableName() string {
@@ -76,4 +110,7 @@ func (b *BackendUser) TableName() string {
 
 func (b *Order) TableName() string {
 	return "rms_order"
+}
+func (b *ShipAction) TableName() string {
+	return "rms_ship_action"
 }
