@@ -30,11 +30,11 @@ func SetupRouter() *gin.Engine {
 		v1.POST("order/ship", Controllers.GetOrderShip) // 订单物流
 		v1.POST("order/order_do", Controllers.OrderDo) // 订单签收 订单支付 订单取消
 		//地址相关
-		v1.POST("address/index", Controllers.ListAddress)
-		v1.POST("address/add", Controllers.AddNewAddress)
-		v1.POST("address/detail", Controllers.GetOneAddress)
-		v1.POST("address/change", Controllers.PutOneAddress)
-		v1.POST("address/delete", Controllers.DeleteAddress)
+		v1.POST("address/index", Controllers.ListAddress) // 获取地址列表
+		v1.POST("address/add", Controllers.AddNewAddress)// 地址添加
+		v1.POST("address/detail", Controllers.GetOneAddress)// 获取地址详情
+		v1.POST("address/change", Controllers.PutOneAddress)// 修改地址
+		v1.POST("address/delete", Controllers.DeleteAddress)// 删除地址
 
 		v1.POST("payment/qrcode", Controllers.GetOnePaymentCode) // 获取付款二维码
 	}
