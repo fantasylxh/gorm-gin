@@ -28,8 +28,15 @@ func SetupRouter() *gin.Engine {
 		v1.POST("order/delete", Controllers.DeleteOrder) // 删除订单
 		v1.POST("order/upload", Controllers.Fileupload) // 上传文件
 		v1.POST("order/ship", Controllers.GetOrderShip) // 订单物流
-		v1.POST("order/sign", Controllers.OrderSign) // 订单签收
-		v1.POST("order/order_do", Controllers.OrderDo) // 订单支付 订单取消
+		v1.POST("order/order_do", Controllers.OrderDo) // 订单签收 订单支付 订单取消
+		//地址相关
+		v1.POST("address/index", Controllers.ListAddress)
+		v1.POST("address/add", Controllers.AddNewAddress)
+		v1.POST("address/detail", Controllers.GetOneAddress)
+		v1.POST("address/change", Controllers.PutOneAddress)
+		v1.POST("address/delete", Controllers.DeleteAddress)
+
+		v1.POST("payment/qrcode", Controllers.GetOnePaymentCode) // 获取付款二维码
 	}
 
 	return r
