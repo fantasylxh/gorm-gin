@@ -1,4 +1,4 @@
-ckage Models
+package Models
 
 import (
 	"gorm-gin/Config"
