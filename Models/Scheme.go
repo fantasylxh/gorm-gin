@@ -126,6 +126,12 @@ type PaymentCode struct {
 	DeletedAt Time   `json:"-" "deleted_at"`
 }
 
+type FeedBack struct {
+	gorm.Model
+	Content   string
+	CreatorId int
+}
+
 func (b *Book) TableName() string {
 	return "book"
 }
@@ -149,12 +155,19 @@ func (b *Order) TableName() string {
 func (b *OrderAction) TableName() string {
 	return "rms_order_action"
 }
+
 func (b *ShipAction) TableName() string {
 	return "rms_ship_action"
 }
+
 func (b *Address) TableName() string {
 	return "rms_user_address"
 }
+
 func (b *PaymentCode) TableName() string {
 	return "rms_payment_code"
+}
+
+func (b *FeedBack) TableName() string {
+	return "rms_feedback"
 }
