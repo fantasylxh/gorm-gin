@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
+	"unicode"
 )
 
 type ResponseData struct {
@@ -36,4 +37,16 @@ func GetRandomString(l int) string {
 }
 func Geturl(r *http.Request) string {
 	return r.Host
+}
+
+/*
+判断字符串是否包含中文字符
+*/
+func IsChineseChar2(str string) bool {
+	for _, r := range str {
+		if unicode.Is(unicode.Scripts["Han"], r) {
+			return true
+		}
+	}
+	return false
 }

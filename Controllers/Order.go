@@ -211,10 +211,10 @@ func Fileupload(c *gin.Context) {
 		return
 	}
 
-	code := c.PostForm("code")
+	order_code := c.PostForm("order_code")
 	code_slice := map[string]bool{"wechat": true, "alipay": true, "cash ": true}
-	if _, ok := code_slice[code]; !ok {
-		ApiHelpers.RespondJSON(c, 0, "", "code参数非法")
+	if _, ok := code_slice[order_code]; !ok {
+		ApiHelpers.RespondJSON(c, 0, "", "order_code参数非法")
 		return
 	}
 
@@ -240,7 +240,6 @@ func Fileupload(c *gin.Context) {
 	}
 
 	order.PayQrcode = filename // 更新二维码
-	order.OrderCode = code     // 更新支付类型
 	c.ShouldBind(&order)
 
 	err = Models.PutOneOrder(&order, id)
