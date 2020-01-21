@@ -38,6 +38,8 @@ func SetupRouter() *gin.Engine {
 		v1.POST("address/delete", Controllers.DeleteAddress)// 删除地址
 
 		v1.POST("payment/qrcode", Controllers.GetOnePaymentCode) // 获取付款二维码
+
+		v1.POST("feedback/add", Controllers.AddNewFeedback) //添加留言反馈
 	}
 
 	return r

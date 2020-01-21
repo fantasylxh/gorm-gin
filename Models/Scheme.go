@@ -71,8 +71,8 @@ type Order struct {
 	City         string       `json:"city" form:"city"`
 	Address      string       `json:"address" form:"address"`
 	Mobile       string       `json:"mobile" form:"mobile"`
-	AddressId    int          `json:"address_id" form:"address_id"`
-	RecAddressId int          `json:"rec_address_id" form:"rec_address_id"`
+	AddressId    string       `json:"address_id" form:"address_id"`
+	RecAddressId string       `json:"rec_address_id" form:"rec_address_id"`
 	RecCountry   string       `json:"rec_country" form:"rec_country"`
 	RecProvince  string       `json:"rec_province" form:"rec_province"`
 	RecCity      string       `json:"rec_city" form:"rec_city"`
@@ -128,8 +128,13 @@ type PaymentCode struct {
 
 type FeedBack struct {
 	gorm.Model
-	Content   string
-	CreatorId int
+	Content   string `json:"content" form:"content" binding:"required"`
+	CreatorId string
+}
+
+type RoleBackenduserRel struct {
+	RoleId        string `json:"role_id"`
+	BackendUserId string `json:"backend_user_id" form:"backend_user_id"`
 }
 
 func (b *Book) TableName() string {
@@ -170,4 +175,8 @@ func (b *PaymentCode) TableName() string {
 
 func (b *FeedBack) TableName() string {
 	return "rms_feedback"
+}
+
+func (b *RoleBackenduserRel) TableName() string {
+	return "rms_role_backenduser_rel"
 }

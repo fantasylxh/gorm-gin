@@ -8,7 +8,7 @@ import (
 )
 
 func GetAllOrder(b *[]Order) (err error) {
-	if err = Config.DB.Find(b).Error; err != nil {
+	if err = Config.DB.Order("id desc").Find(b).Error; err != nil {
 		return err
 	}
 	return nil

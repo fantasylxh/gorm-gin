@@ -31,6 +31,8 @@ func ListOrder(c *gin.Context) {
 func AddNewOrder(c *gin.Context) {
 	var order Models.Order
 	uid := strings.TrimSpace(c.PostForm("uid"))
+	address_id := strings.TrimSpace(c.PostForm("address_id"))
+	rec_address_id := strings.TrimSpace(c.PostForm("rec_address_id"))
 	order_sn := strings.TrimSpace(c.PostForm("order_sn"))
 	if order_sn == "" {
 		ApiHelpers.RespondJSON(c, 0, "", "order_sn不能为空")
@@ -38,6 +40,34 @@ func AddNewOrder(c *gin.Context) {
 	}
 	order.CreatorId = uid
 	c.ShouldBind(&order)
+	// 同步处理address_id rec_address_id 到order表
+	if address_id != "" {
+		var address Models.Address
+		err := Models.GetOneAddress(&address, address_id)
+		if err != nil {
+			ApiHelpers.RespondJSON(c, 0, "", "address_id地址记录不存在")
+			return
+		}
+		order.Country = address.Country
+		order.Province = address.Province
+		order.City = address.City
+		order.Address = address.Address
+		order.Mobile = address.Mobile
+	}
+	if rec_address_id != "" {
+		var address Models.Address
+		err := Models.GetOneAddress(&address, rec_address_id)
+		if err != nil {
+			ApiHelpers.RespondJSON(c, 0, "", "rec_address_id地址记录不存在")
+			return
+		}
+		order.RecCountry = address.Country
+		order.RecProvince = address.Province
+		order.RecCity = address.City
+		order.RecAddress = address.Address
+		order.RecMobile = address.Mobile
+	}
+
 	err := Models.AddNewOrder(&order)
 	if err != nil {
 		ApiHelpers.RespondJSON(c, 0, order, err.Error())

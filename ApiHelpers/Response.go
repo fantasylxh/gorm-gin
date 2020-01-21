@@ -42,7 +42,7 @@ func Geturl(r *http.Request) string {
 /*
 判断字符串是否包含中文字符
 */
-func IsChineseChar2(str string) bool {
+func IsChineseChar(str string) bool {
 	for _, r := range str {
 		if unicode.Is(unicode.Scripts["Han"], r) {
 			return true
