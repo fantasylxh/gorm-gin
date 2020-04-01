@@ -3,11 +3,12 @@ package Routers
 import (
 	"github.com/gin-gonic/gin"
 	"gorm-gin/Controllers"
+	"gorm-gin/middleware/cors"
 )
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-
+	r.Use(cors.CorsHandler())
 	v1 := r.Group("/v1")
 	{
 		v1.GET("book", Controllers.ListBook)
