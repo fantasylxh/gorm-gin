@@ -17,7 +17,7 @@ func GetOnePaymentCode(c *gin.Context) {
 	var payment_code Models.PaymentCode
 	err := Models.GetOnePaymentCode(&payment_code, order_code)
 	if err != nil {
-		payment_code.img = "http://express.zhang6.net" + payment_code.img
+		payment_code.Img = "http://express.zhang6.net" + payment_code.Img
 		ApiHelpers.RespondJSON(c, 0, payment_code, err.Error())
 	} else {
 		ApiHelpers.RespondJSON(c, 200, payment_code, "success")
