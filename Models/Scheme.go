@@ -119,7 +119,7 @@ type Address struct {
 type PaymentCode struct {
 	ID        uint   `json:"id"`
 	Img       string `json:"img"`
-	Code      string `json:"code" form:"code" binding:"required"`
+	OrderCode string `json:"order_code" form:"order_code" binding:"required"`
 	Status    string `json:"status" form:"status"`
 	CreatedAt Time   `json:"-" "created_at"`
 	UpdatedAt Time   `json:"-" "updated_at"`
