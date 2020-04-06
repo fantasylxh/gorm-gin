@@ -43,18 +43,13 @@ func ListOrder(c *gin.Context) {
 	if err != nil {
 		ApiHelpers.RespondJSON(c, 0, count, err.Error())
 	} else {
-		// 重新解析数据返回结构
-		var res struct {
-			Code   int
-			Count  int
-			Msg    interface{}
-			Result interface{}
-		}
-		res.Code = 200
-		res.Msg = "success"
-		res.Count = count
-		res.Result = order
-		ApiHelpers.RespondJSON(c, 200, res, "success", )
+		//ApiHelpers.RespondJSON(c, 200, order, "success")
+		c.JSON(200, gin.H{
+			"Code":   200,
+			"Count":  count,
+			"Msg":    "success",
+			"Result": order,
+		})
 	}
 }
 
