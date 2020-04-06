@@ -89,21 +89,21 @@ type Order struct {
 	ShipActions  []ShipAction `gorm:"FOREIGNKEY:OrderId;ASSOCIATION_FOREIGNKEY:Id"`
 }
 type ShipAction struct {
-	Id         int       `json:"id"` // 自增
-	ShipStatus int       `json:"ship_status"`
-	ActionNote string    `json:"action_note"`
-	CreatedAt  string    `json:"created_at"` //time.Time时间格式化输出问题 todo 优化
-	DeletedAt  time.Time `json:"-" deleted_at"`
-	OrderId    int       `json:"order_id" form:"order_id" binding:"required"`
-	CreatorId  int       `json:"creator_id"`
+	Id         int        `json:"id"` // 自增
+	ShipStatus int        `json:"ship_status"`
+	ActionNote string     `json:"action_note"`
+	CreatedAt  string     `json:"created_at"` //time.Time时间格式化输出问题 todo 优化
+	DeletedAt  *time.Time `json:"deleted_at"`
+	OrderId    int        `json:"order_id" form:"order_id" binding:"required"`
+	CreatorId  int        `json:"creator_id"`
 }
 
 type OrderAction struct {
 	ID         uint
 	ActionNote string
 	CreatedAt  time.Time
-	DeletedAt  time.Time
-	OrderId    int `json:"order_id" form:"order_id" binding:"required"`
+	DeletedAt  *time.Time `json:"deleted_at"`
+	OrderId    int        `json:"order_id" form:"order_id" binding:"required"`
 	CreatorId  int
 }
 
