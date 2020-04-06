@@ -20,12 +20,30 @@ import (
 
 func ListOrder(c *gin.Context) {
 	var order []Models.Order
-	err := Models.GetAllOrder(&order)
+	uid := strings.TrimSpace(c.PostForm("uid"))
+	// 获取当前用户角色
+	var role Models.RoleBackenduserRel
+	err := Models.GetOneRole(&role, uid)
 	if err != nil {
-		ApiHelpers.RespondJSON(c, 0, order, err.Error())
-	} else {
+		ApiHelpers.RespondJSON(c, 0, role, "当前用户没有分配角色")
+		return
+	}
+	var keyMap map[string]string = map[string]string{
+		"q_type":       c.DefaultPostForm("q_type", "1"), //查询类型 1：签收 2：发走 默认1为签收
+		"keyword":      strings.TrimSpace(c.PostForm("keyword")),
+		"page":         c.DefaultPostForm("page", "2"),
+		"order_status": strings.TrimSpace(c.PostForm("order_status")),
+		"ship_status":  strings.TrimSpace(c.PostForm("ship_status")),
+		"uid":          uid,
+		"role_id":      role.RoleId,
+	}
 
-		ApiHelpers.RespondJSON(c, 200, order, "success")
+	err, count := Models.GetAllOrder(&order, keyMap)
+
+	if err != nil {
+		ApiHelpers.RespondJSON(c, 0, count, err.Error())
+	} else {
+		ApiHelpers.RespondJSON(c, 200, order, "success", )
 	}
 }
 
@@ -135,6 +153,7 @@ func OrderDo(c *gin.Context) {
 	case "order_pay_confirm": // 确认支付order_status =1 更新付款时间
 		Models.UpdateOrderPayTime(&order, id)
 		order.OrderStatus = 1
+		order.PayStatus = 1
 		orderActionNote = user.UserName + ":" + user.RealName + "修改了订单支付状态为:已付款";
 
 	case "order_cancel": // 取消订单 order_status =2
