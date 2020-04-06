@@ -28,10 +28,11 @@ func ListOrder(c *gin.Context) {
 		ApiHelpers.RespondJSON(c, 0, role, "当前用户没有分配角色")
 		return
 	}
+
 	var keyMap map[string]string = map[string]string{
 		"q_type":       c.DefaultPostForm("q_type", "1"), //查询类型 1：签收 2：发走 默认1为签收
 		"keyword":      strings.TrimSpace(c.PostForm("keyword")),
-		"page":         c.DefaultPostForm("page", "2"),
+		"page":         c.DefaultPostForm("page", "1"),
 		"order_status": strings.TrimSpace(c.PostForm("order_status")),
 		"ship_status":  strings.TrimSpace(c.PostForm("ship_status")),
 		"uid":          uid,
@@ -39,11 +40,21 @@ func ListOrder(c *gin.Context) {
 	}
 
 	err, count := Models.GetAllOrder(&order, keyMap)
-
 	if err != nil {
 		ApiHelpers.RespondJSON(c, 0, count, err.Error())
 	} else {
-		ApiHelpers.RespondJSON(c, 200, order, "success", )
+		// 重新解析数据返回结构
+		var res struct {
+			Code   int
+			Count  int
+			Msg    interface{}
+			Result interface{}
+		}
+		res.Code = 200
+		res.Msg = "success"
+		res.Count = count
+		res.Result = order
+		ApiHelpers.RespondJSON(c, 200, res, "success", )
 	}
 }
 
@@ -58,6 +69,20 @@ func AddNewOrder(c *gin.Context) {
 		return
 	}
 	order.CreatorId = uid
+	// 验证订单来源 0:中国到孟加拉 1:孟加拉到中国 3:孟加拉到孟加拉国内'
+	// 获取当前用户角色
+	var role Models.RoleBackenduserRel
+	err := Models.GetOneRole(&role, uid)
+	if err != nil {
+		ApiHelpers.RespondJSON(c, 0, role, "当前用户没有分配角色")
+		return
+	}
+	if role.RoleId == "25" { // 快递管理员-中国
+		order.OrderFrom = 0
+	} else { // 快递管理员-孟加拉
+		order.OrderFrom = 1
+	}
+
 	c.ShouldBind(&order)
 	// 同步处理address_id rec_address_id 到order表
 	if address_id != "" {
@@ -89,7 +114,7 @@ func AddNewOrder(c *gin.Context) {
 		order.RecMobile = address.Mobile
 	}
 
-	err := Models.AddNewOrder(&order)
+	err = Models.AddNewOrder(&order)
 	if err != nil {
 		ApiHelpers.RespondJSON(c, 0, order, err.Error())
 		return

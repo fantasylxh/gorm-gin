@@ -63,6 +63,7 @@ type Order struct {
 	CategoryId   string       `json:"category_id" form:"category_id" binding:"required"`
 	PayTime      Time         `json:"pay_time"`
 	OrderCode    string       `json:"order_code" form:"order_code"`
+	OrderFrom    int          `json:"order_from" form:"order_from"`
 	OrderStatus  int          `json:"order_status" form:"order_status"`
 	OrderPrice   string       `json:"order_price"`
 	PayStatus    int          `json:"pay_status" form:"pay_status"`

@@ -17,21 +17,21 @@ func GetByKeyword(keyword string) func(db *gorm.DB) *gorm.DB {
 }
 
 //订单状态 待支付 已支付
-func OrderStatus(status []string) func(db *gorm.DB) *gorm.DB {
+func OrderStatus(status []int) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		return db.Scopes(GetByKeyword("")).Where("order_status in (?)", status)
+		return db.Where("order_status in (?)", status)
 	}
 }
 
-//物流状态
-func ShipStatus(status []string) func(db *gorm.DB) *gorm.DB {
+//物流状态0，未发货；1，已揽件；2，已发货(运输中)；3，已到达；4，已签收',
+func ShipStatus(status []int) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		return db.Scopes(GetByKeyword("")).Where("ship_status in (?)", status)
+		return db.Where("ship_status in (?)", status)
 	}
 }
 
 //订单来源 0:中国到孟加拉 1:孟加拉到中国 3:孟加拉到孟加拉国内
-func OrderFrom(order_from []string) func(db *gorm.DB) *gorm.DB {
+func OrderFrom(order_from []int) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Where("order_from in (?)", order_from)
 	}
@@ -49,35 +49,37 @@ func OrderWithUid(uid string) func(db *gorm.DB) *gorm.DB {
 func GetAllOrder(b *[]Order, conditions map[string]string) (err error, count int) {
 	var page string = conditions["page"]
 	pageInt, err := strconv.Atoi(page)
-	var pageSize int = 2
-
+	var pageSize int = 10 //每页显示数量
+	//全局基础查询条件
+	var intOrderArr = []int{0, 1, 2} // 查询初始化订单0：待支付,1；已支付, 2：已取消',
+	order_status, _ := strconv.Atoi(conditions["order_status"])
+	if conditions["order_status"] != "" {
+		intOrderArr = []int{order_status}
+	}
+	var intShipArr = []int{0, 1, 2, 3, 4} // 查询初始化物流0，未发货；1，已揽件；2，已发货(运输中)；3，已到达；4，已签收',
+	ship_status, _ := strconv.Atoi(conditions["ship_status"])
+	if conditions["ship_status"] != "" {
+		intShipArr = []int{ship_status}
+	}
 	// 默认为签收,获取取指page，指定pagesize的记录,
 	if conditions["q_type"] == "1" {
 		// 验证当前用户角色
 		if conditions["role_id"] == "24" { // 快递管理员-孟加拉, 则签收订单为 所有来着中国滴订单 order_from =0
-			Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]string{"0"})).Limit(pageSize).Offset((pageInt - 1) * pageSize).Order("created_at desc").Find(&b)
+			Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]int{0}), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Limit(pageSize).Offset((pageInt - 1) * pageSize).Order("created_at desc").Find(&b)
 			// 获取总条数
-			Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]string{"0"})).Count(&count)
+			Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]int{0}), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Count(&count)
 		} else if conditions["role_id"] == "25" { // 快递管理员-中国 则签收订单为 所有来着孟加拉达卡滴订单 order_from =1
-			Config.DB.Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]string{"1"})).Limit(pageSize).Offset((pageInt - 1) * pageSize).Order("created_at desc").Find(&b)
+			Config.DB.Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]int{1}), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Limit(pageSize).Offset((pageInt - 1) * pageSize).Order("created_at desc").Find(&b)
 			// 获取总条数
-			Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]string{"0"})).Count(&count)
+			Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]int{1}), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Count(&count)
 		}
 	}
 	// 查询发走的订单
 	if conditions["q_type"] == "2" {
-		Config.DB.Scopes(GetByKeyword(conditions["keyword"]), OrderWithUid(conditions["uid"])).Limit(pageSize).Offset((pageInt - 1) * pageSize).Order("created_at desc").Find(&b)
+		Config.DB.Scopes(GetByKeyword(conditions["keyword"]), OrderWithUid(conditions["uid"]), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Limit(pageSize).Offset((pageInt - 1) * pageSize).Order("created_at desc").Find(&b)
 		// 获取总条数
-		Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderWithUid(conditions["uid"])).Count(&count)
+		Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderWithUid(conditions["uid"]), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Count(&count)
 	}
-
-	/*	if conditions["order_status"] != "" {
-		if err = Config.DB.Scopes(OrderStatus([]string{conditions["order_status"]})).Order("id desc").Find(b).Error; err != nil {
-			return err, 0
-		}
-
-		fmt.Println(b, "总数：", count)
-	}*/
 
 	return nil, count
 }
