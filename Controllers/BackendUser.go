@@ -22,7 +22,7 @@ func UserLogin(c *gin.Context) {
 	if err != nil {
 		ApiHelpers.RespondJSON(c, 0, "", err.Error())
 	} else {
-		ApiHelpers.RespondJSON(c, 200, Models.BackendUser{Id: user.Id}, "success")
+		ApiHelpers.RespondJSON(c, 200, Models.BackendUser{Id: user.Id, UserName: user.UserName, RealName: user.RealName, Email: user.Email, Mobile: user.Mobile}, "success")
 	}
 
 }

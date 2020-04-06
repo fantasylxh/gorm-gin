@@ -48,10 +48,12 @@ type CategoryPrice struct {
 type BackendUser struct {
 	Id       int    `json:"uid" form:"uid" primaryKey:"true"`
 	UserName string `json:"user_name" form:"user_name" binding:"required"`
-	RealName string `json:"real_name,omitempty"`
+	RealName string `json:"real_name" form:"real_name"`
+	Mobile   string `json:"mobile" form:"mobile"`
+	Email    string `json:"email" form:"email"`
 	//AccessToken string `json:"access_token" form:"token" binding:"required"`
 	UserPwd string `json:"-" "user_pwd" form:"user_pwd"`
-	Status  int    `json:"status"`
+	Status  int    `json:"-"`
 }
 
 type Order struct {
@@ -66,6 +68,8 @@ type Order struct {
 	PayStatus    int          `json:"pay_status" form:"pay_status"`
 	ShipStatus   int          `json:"ship_status" form:"ship_status"`
 	PayQrcode    string       `json:"pay_qrcode" form:"pay_qrcode"`
+	Name         string       `json:"name" form:"name"`
+	RecName      string       `json:"rec_name" form:"rec_name"`
 	Country      string       `json:"country" form:"country"`
 	Province     string       `json:"province" form:"province"`
 	City         string       `json:"city" form:"city"`
@@ -78,6 +82,7 @@ type Order struct {
 	RecCity      string       `json:"rec_city" form:"rec_city"`
 	RecAddress   string       `json:"rec_address" form:"rec_address"`
 	RecMobile    string       `json:"rec_mobile" form:"rec_mobile"`
+	Comment      string       `json:"comment" form:"comment"`
 	CreatedAt    Time         `json:"created_at"`
 	UpdatedAt    time.Time    `json:"-" "updated_at"`
 	CreatorId    string       `json:"creator_id"`
@@ -104,6 +109,7 @@ type OrderAction struct {
 
 type Address struct {
 	ID          uint   `json:"address_id"`
+	Name        string `json:"name" form:"name" binding:"required"`
 	Country     string `json:"country" form:"country" binding:"required"`
 	Province    string `json:"province" form:"province" binding:"required"`
 	City        string `json:"city" form:"city" binding:"required"`
