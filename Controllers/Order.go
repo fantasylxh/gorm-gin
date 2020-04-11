@@ -33,6 +33,7 @@ func ListOrder(c *gin.Context) {
 		"q_type":       c.DefaultPostForm("q_type", "1"), //查询类型 1：签收 2：发走 默认1为签收
 		"keyword":      strings.TrimSpace(c.PostForm("keyword")),
 		"page":         c.DefaultPostForm("page", "1"),
+		"pay_status":   strings.TrimSpace(c.PostForm("pay_status")),
 		"order_status": strings.TrimSpace(c.PostForm("order_status")),
 		"ship_status":  strings.TrimSpace(c.PostForm("ship_status")),
 		"uid":          uid,
@@ -174,13 +175,13 @@ func OrderDo(c *gin.Context) {
 		Models.UpdateOrderPayTime(&order, id)
 		order.OrderStatus = 1
 		order.PayStatus = 1
-		orderActionNote = user.UserName + ":" + user.RealName + "修改了订单支付状态为:已付款";
+		orderActionNote = user.UserName + ":" + user.RealName + "修改了[订单支付]状态为:已付款";
 
 	case "order_cancel": // 取消订单 order_status =2
 		order.OrderStatus = 2
-		orderActionNote = user.UserName + ":" + user.RealName + "修改了订单状态为:取消订单";
+		orderActionNote = user.UserName + ":" + user.RealName + "修改了[订单状态]为:取消订单";
 	case "order_collect", "order_deliver", "order_arrive", "order_sign": // 揽件1/发走2/已达到3/签收订单4 ship_status=4 记录物流 未支付 未发货的不能签收
-		if order.PayStatus < 1 {
+		if order.PayStatus < 1 || order.OrderStatus < 1 {
 			ApiHelpers.RespondJSON(c, 0, "", "未支付的快递无法操作")
 			return
 		}
@@ -191,48 +192,58 @@ func OrderDo(c *gin.Context) {
 		}
 		// 验证签收物流程序 已揽件->已发货(运输中)->已到达->已签收
 		var saction Models.ShipAction
-		if shipMap[order_method] == 3 || shipMap[order_method] == 2 {
+		if shipMap[order_method] == 4 || shipMap[order_method] == 3 || shipMap[order_method] == 2 {
 			// 查询是否走了上一个流程
 			shipStatus := shipMap[order_method] - 1
 			err := Models.GetOneShip(&saction, id, shipStatus)
-			if err != nil {
+			if err != nil { // 找不到上一个物流状态的记录，则不允许跨物流操作
+				log.Println(err)
 				ApiHelpers.RespondJSON(c, 0, saction, "请确认流程是否正确：已揽件->已发货->已到达->已签收")
 				return
+			} else { // 存在上一个物流状态的记录，则允许此次物流操作
+				order.ShipStatus = shipMap[order_method] // 更新订单状态为签收
+				if shipMap[order_method] == 1 {
+					saction.ActionNote = "快递员：" + user.RealName + "已揽件";
+				} else if shipMap[order_method] == 2 {
+					saction.ActionNote = "快递员：" + user.RealName + "已发货(运输中)";
+				} else if shipMap[order_method] == 3 {
+					saction.ActionNote = "订单已到达取件点,请保持收件人电话畅通)";
+				} else {
+					saction.ActionNote = "收件人已签收,欢迎再次使用。"
+				}
+				// 记录物流信息
+				saction.Id = saction.Id + 1 // 注意dumplitekey问题
+				saction.CreatorId = uInt
+				saction.OrderId = id
+				saction.ActionNote = saction.ActionNote
+				saction.ShipStatus = shipMap[order_method] // 标记物流状态
+				saction.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
+				err := Models.AddNewShipAction(&saction)
+				if err != nil {
+					log.Println(err)
+					tx.Rollback()
+				}
 			}
-		}
-		order.ShipStatus = shipMap[order_method] // 更新订单状态为签收
-		orderActionNote = user.UserName + ":" + user.RealName + "修改了物流状态为:已签收";
-		// 记录物流信息
-		c.ShouldBind(&saction)
-		if shipMap[order_method] == 1 {
-			saction.ActionNote = "快递员：" + user.RealName + "已揽件";
-		} else if shipMap[order_method] == 2 {
-			saction.ActionNote = "快递员：" + user.RealName + "已发货(运输中)";
-		} else if shipMap[order_method] == 3 {
-			saction.ActionNote = "订单已到达取件点,请保持收件人电话畅通)";
-		} else {
-			saction.ActionNote = "收件人已签收,欢迎再次使用。"
-		}
-		saction.CreatorId = uInt
-		saction.ShipStatus = shipMap[order_method] // 标记物流状态
-		saction.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
-		err := Models.AddNewShipAction(&saction)
-		if err != nil {
-			tx.Rollback()
 		}
 	}
 	// 记录order_action
-	var oaction Models.OrderAction
-	c.ShouldBind(&oaction)
-	oaction.ActionNote = orderActionNote
-	oaction.CreatorId = uInt
-	err = Models.AddNewOrderAction(&oaction)
-	if err != nil {
-		tx.Rollback()
+	if order_method == "order_pay_confirm" || order_method == "order_cancel," {
+		var oaction Models.OrderAction
+		c.ShouldBind(&oaction)
+		oaction.ActionNote = orderActionNote
+		oaction.CreatorId = uInt
+		oaction.OrderStatus = order.OrderStatus
+		err = Models.AddNewOrderAction(&oaction)
+		if err != nil {
+			log.Println(err)
+			tx.Rollback()
+		}
 	}
+
 	c.Bind(&order)
 	err = Models.PutOneOrder(&order, id)
 	if err != nil {
+		log.Println(err)
 		tx.Rollback()
 		ApiHelpers.RespondJSON(c, 0, order, err.Error())
 	} else {

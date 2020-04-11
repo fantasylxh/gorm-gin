@@ -12,7 +12,7 @@ import (
 //关键字查询
 func GetByKeyword(keyword string) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		return db.Where("order_sn like ?", "%"+keyword+"%").Or("name like ?", "%"+keyword+"%").Or("rec_name like ?", "%"+keyword+"%")
+		return db.Where("order_sn like ? or  name like ? or rec_name like ?", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%")
 	}
 }
 
@@ -20,6 +20,13 @@ func GetByKeyword(keyword string) func(db *gorm.DB) *gorm.DB {
 func OrderStatus(status []int) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Where("order_status in (?)", status)
+	}
+}
+
+//订单支付状态 待支付 已支付
+func PayStatus(status []int) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where("pay_status in (?)", status)
 	}
 }
 
@@ -56,6 +63,11 @@ func GetAllOrder(b *[]Order, conditions map[string]string) (err error, count int
 	if conditions["order_status"] != "" {
 		intOrderArr = []int{order_status}
 	}
+	var intPayArr = []int{0, 1} // 查询初始化订单支付状态 0：未支付  1：已支付
+	pay_status, _ := strconv.Atoi(conditions["pay_status"])
+	if conditions["pay_status"] != "" {
+		intPayArr = []int{pay_status}
+	}
 	var intShipArr = []int{0, 1, 2, 3, 4} // 查询初始化物流0，未发货；1，已揽件；2，已发货(运输中)；3，已到达；4，已签收',
 	ship_status, _ := strconv.Atoi(conditions["ship_status"])
 	if conditions["ship_status"] != "" {
@@ -65,20 +77,20 @@ func GetAllOrder(b *[]Order, conditions map[string]string) (err error, count int
 	if conditions["q_type"] == "1" {
 		// 验证当前用户角色
 		if conditions["role_id"] == "24" { // 快递管理员-孟加拉, 则签收订单为 所有来着中国滴订单 order_from =0
-			Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]int{0}), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Limit(pageSize).Offset((pageInt - 1) * pageSize).Order("created_at desc").Find(&b)
+			Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]int{0}), PayStatus(intPayArr), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Limit(pageSize).Offset((pageInt - 1) * pageSize).Order("created_at desc").Find(&b)
 			// 获取总条数
-			Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]int{0}), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Count(&count)
+			Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]int{0}), PayStatus(intPayArr), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Count(&count)
 		} else if conditions["role_id"] == "25" { // 快递管理员-中国 则签收订单为 所有来着孟加拉达卡滴订单 order_from =1
-			Config.DB.Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]int{1}), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Limit(pageSize).Offset((pageInt - 1) * pageSize).Order("created_at desc").Find(&b)
+			Config.DB.Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]int{1}), PayStatus(intPayArr), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Limit(pageSize).Offset((pageInt - 1) * pageSize).Order("created_at desc").Find(&b)
 			// 获取总条数
-			Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]int{1}), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Count(&count)
+			Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderFrom([]int{1}), PayStatus(intPayArr), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Count(&count)
 		}
 	}
 	// 查询发走的订单
 	if conditions["q_type"] == "2" {
-		Config.DB.Scopes(GetByKeyword(conditions["keyword"]), OrderWithUid(conditions["uid"]), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Limit(pageSize).Offset((pageInt - 1) * pageSize).Order("created_at desc").Find(&b)
+		Config.DB.Scopes(GetByKeyword(conditions["keyword"]), OrderWithUid(conditions["uid"]), PayStatus(intPayArr), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Limit(pageSize).Offset((pageInt - 1) * pageSize).Order("created_at desc").Find(&b)
 		// 获取总条数
-		Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderWithUid(conditions["uid"]), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Count(&count)
+		Config.DB.Model(&Order{}).Scopes(GetByKeyword(conditions["keyword"]), OrderWithUid(conditions["uid"]), PayStatus(intPayArr), OrderStatus(intOrderArr), ShipStatus(intShipArr)).Count(&count)
 	}
 
 	return nil, count
