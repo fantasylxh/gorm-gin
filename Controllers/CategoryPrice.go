@@ -19,7 +19,7 @@ func GetOneCategoryPrice(c *gin.Context) {
 	err := Models.GetOneCategoryPrice(&category_price, id, weight)
 	if err != nil {
 		category_price.Price = "10" // 初始值
-		ApiHelpers.RespondJSON(c, 0, category_price, err.Error())
+		ApiHelpers.RespondJSON(c, 200, category_price, err.Error())
 	} else {
 		ApiHelpers.RespondJSON(c, 200, category_price, "success")
 	}
